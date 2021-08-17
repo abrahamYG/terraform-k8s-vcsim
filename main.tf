@@ -5,20 +5,20 @@ provider "kubernetes" {
 
 resource "kubernetes_namespace" "vcsim" {
   metadata {
-    name = "vcsim"
+    name = var.namespace_name
   }
 }
 
 resource "kubernetes_service" "vcsim_service" {
   metadata {
-    name = "vcsim-service"
+    name      = var.service_name
     namespace = kubernetes_namespace.vcsim.metadata.0.name
   }
   spec {
     selector = {
       app = kubernetes_deployment.vcsim_deployment.metadata.0.labels.app
     }
-    
+
     port {
       port        = 8989
       target_port = 8989
@@ -30,10 +30,10 @@ resource "kubernetes_service" "vcsim_service" {
 
 resource "kubernetes_deployment" "vcsim_deployment" {
   metadata {
-    name = "vcsim-deployment"
+    name      = var.deployment_name
     namespace = kubernetes_namespace.vcsim.metadata.0.name
     labels = {
-      app = "vcsim"
+      app = var.app_name
 
     }
 
@@ -42,14 +42,14 @@ resource "kubernetes_deployment" "vcsim_deployment" {
     replicas = 1
     selector {
       match_labels = {
-        app : "vcsim"
+        app = var.app_name
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "vcsim"
+          app = var.app_name
 
         }
 
@@ -57,7 +57,7 @@ resource "kubernetes_deployment" "vcsim_deployment" {
       spec {
         container {
           name  = "vcsim"
-          image = "vmware/vcsim:latest"
+          image = var.image
 
         }
 
